@@ -1,7 +1,12 @@
 # rent-distribution
+I wrote this while looking at properties on Zoopla. It is just a small project to get an idea of the price distribution of a certain type of property in a given area.
+
+## Load libraries
 ```R
 library(rvest); library(ggplot2)
-
+```
+## Get webpage
+```R
 # Property to rent near King's Cross, all results (29th Jan 2017)
 webpage <- read_html("http://www.zoopla.co.uk/to-rent/property/london/kings-cross/?include_shared_accommodation=false&price_frequency=per_month&q=Kings%20Cross%2C%20London&results_sort=newest_listings&search_source=to-rent&page_size=500")
 
@@ -11,7 +16,9 @@ prices <- webpage %>% html_nodes(".text-price") %>% html_text()
 
 # getting addresses
 addresses <- webpage %>% html_nodes(".listing-results-address") %>% html_text()
-
+```
+## Clean up
+```R
 clean.string <- NULL
 for (i in 1:length(prices)) {
   clean.string <- append(clean.string, strsplit(prices, "£")[[i]][[2]])
@@ -48,7 +55,9 @@ plot.h <- function(input) {
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 } 
-
+```
+## Get insights
+```R
 plot <- plot.h(properties$prices)
 
 plot
