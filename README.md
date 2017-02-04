@@ -42,8 +42,6 @@ head(properties)
 # 6   1387       Albany House
 ```
 ```R
-rm(prices, roads, webpage)
-
 saveRDS(properties, file = paste0(Sys.Date(), " King's Cross.rds"))
 
 plot.h <- function(input) {
@@ -73,3 +71,37 @@ summary(properties$prices)[c(1, 4, 6)]
 # Min.  Mean  Max. 
 #  700  2120 22750
 ```
+
+## Further analysis
+
+```R
+# getting type of property
+type <- webpage %>% html_nodes("h2 a") %>% html_text()
+type <- gsub(" to rent", "", type)
+
+# manual adjustment to remove extra result
+prices <- prices[-1]
+roads <- roads[-1]
+
+properties <- data.frame(prices = prices,
+                         roads = as.factor(roads),
+                         type = as.factor(type))
+                         
+# subsetting to work only with properties of interest
+prop.subset <- properties[(properties$type == "1 bed flat" | properties$type == "2 bed duplex" | properties$type == "2 bed flat" | properties$type == "3 bed flat" | properties$type == "4 bed flat" | properties$type == "Studio") & properties$prices < 10000, ]
+
+# plotting
+ggplot(prop.subset, aes(x = prices, fill = type)) +
+  #geom_histogram(aes(y = ..density..), bins = 50) +
+  #geom_density(col = "red")
+  geom_histogram(aes(col = type), alpha = 0.3, binwidth = 100) +
+  scale_x_continuous(breaks = c(seq(from = min(prop.subset$prices),
+                                    to = max(prop.subset$prices), 
+                                    by = 1000))) +
+  scale_y_continuous(limits = c(0, 50),
+                     expand = c(0, 0)) +
+  facet_wrap(~ type) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+  ```
+![](2017-02-02 King's Cross facets.png)
